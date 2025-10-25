@@ -1,5 +1,5 @@
 {
-   "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
   "background": "white",
   "padding": 5,
   "width": 800,
@@ -12,21 +12,25 @@
 
   "data": [
     {
-      "name": "source_1",
-      "url": "unplanned_burns.csv",
+      "name": "burns_data",
+      "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/unplanned_burns.csv",
       "format": { "type": "csv" },
       "transform": [
         {
           "type": "formula",
           "as": "StateName",
           "expr": "datum.StateCode==='ACT' ? 'Australian Capital Territory' : datum.StateCode==='NSW' ? 'New South Wales' : datum.StateCode==='NT' ? 'Northern Territory' : datum.StateCode==='QLD' ? 'Queensland' : datum.StateCode==='SA' ? 'South Australia' : datum.StateCode==='TAS' ? 'Tasmania' : datum.StateCode==='VIC' ? 'Victoria' : datum.StateCode==='WA' ? 'Western Australia' : null"
+        },
+        {
+          "type": "filter",
+          "expr": "datum.Year == '2019-2020'"
         }
       ]
     },
 
     {
       "name": "aus_states",
-      "url": "au-states-topo.json",
+      "url": "https://raw.githubusercontent.com/rowanhogan/australian-states/master/states.geojson",
       "format": { "type": "json" },
       "transform": [
         {
@@ -34,32 +38,34 @@
           "as": "STATE_NAME",
           "expr": "datum.properties && datum.properties.STATE_NAME"
         },
-
         {
           "type": "lookup",
-          "from": "source_1",
-          "key": "StateName",
-          "fields": ["STATE_NAME"],
+          "from": "burns_data",
+          "key": "StateName",          
+          "fields": ["STATE_NAME"],      
           "values": ["Burns", "Year"],
           "as": ["Burns", "Year"]
-        },
-
-        {
-          "type": "filter",
-          "expr": "datum.Year == '2019-2020'"
         }
       ]
     }
   ],
 
-  "projections": [
+  "signals": [
     {
       "name": "projection",
-      "type": "mercator",
-      "center": [133, -28],
-      "scale": 850
+      "value": { "type": "mercator", "center": [133, -28], "scale": 850 }
     }
   ],
+
+  "projections": [
+  {
+    "name": "projection",
+    "type": "mercator",
+    "center": [133, -28],
+    "scale": 850
+  }
+],
+
 
   "scales": [
     {
@@ -79,21 +85,27 @@
       "transform": [
         { "type": "geoshape", "projection": "projection" }
       ],
-      "fill": [
-        {
-          "test": "isValid(datum.Burns) && isFinite(+datum.Burns)",
-          "scale": "color",
-          "field": "Burns"
-        },
-        { "value": "#f0f0f0" }
-      ],
-      "stroke": { "value": "white" },
-      "strokeWidth": { "value": 0.5 },
-      "tooltip": {
-        "signal": "{'State': datum.STATE_NAME, 'Year': datum.Year, 'Burns': datum.Burns}"
-      },
-      "ariaRoleDescription": { "value": "geoshape" },
-      "description": "Map of unplanned burns per state for 2019-2020"
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "isValid(datum.Burns) && isFinite(+datum.Burns)",
+              "scale": "color",
+              "field": "Burns"
+            },
+            { "value": "#f0f0f0" }
+          ],
+          "stroke": { "value": "white" },
+          "strokeWidth": { "value": 0.5 },
+          "tooltip": {
+            "signal": "{'State': datum.STATE_NAME, 'Year': datum.Year, 'Burns': datum.Burns}"
+          },
+          "ariaRoleDescription": { "value": "geoshape" },
+          "description": {
+            "signal": "'State: ' + datum.STATE_NAME + ', Burns: ' + datum.Burns + ', Year: ' + datum.Year"
+          }
+        }
+      }
     }
   ],
 
