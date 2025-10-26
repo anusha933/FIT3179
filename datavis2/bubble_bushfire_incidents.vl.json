@@ -1,0 +1,49 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Major Australian Bushfire Events: Scale, Damage, and Lives Lost",
+  "data": {
+    "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/fire_incidents.csv",
+    "format": {"type": "csv"}
+  },
+  "width": 700,
+  "height": 400,
+
+  "transform": [
+    {"calculate": "toNumber(datum['Area Burnt (ha, thousand)'])", "as": "AreaBurntNum"},
+    {"calculate": "toNumber(datum['Homes lost'])", "as": "HomesLostNum"},
+    {"calculate": "toNumber(datum['Lives lost'])", "as": "LivesLostNum"}
+  ],
+
+  "mark": {"type": "circle", "opacity": 0.8, "stroke": "black", "strokeWidth": 1},
+
+  "encoding": {
+    "x": {
+      "field": "AreaBurntNum",
+      "type": "quantitative",
+      "title": "Area Burnt (thousand hectares, log scale)",
+      "scale": {"type": "log"}       
+    },
+    "y": {
+      "field": "HomesLostNum",
+      "type": "quantitative",
+      "title": "Homes Lost"
+    },
+    "size": {
+      "field": "LivesLostNum",
+      "type": "quantitative",
+      "title": "Lives Lost",
+      "scale": {"range": [100, 3000]}
+    },
+    "color": {
+      "field": "Incident",
+      "type": "nominal",
+      "title": "Incident"
+    },
+    "tooltip": [
+      {"field": "Incident", "type": "nominal"},
+      {"field": "AreaBurntNum", "type": "quantitative", "title": "Area Burnt (thousand ha)"},
+      {"field": "HomesLostNum", "type": "quantitative", "title": "Homes Lost"},
+      {"field": "LivesLostNum", "type": "quantitative", "title": "Lives Lost"}
+    ]
+  }
+}
