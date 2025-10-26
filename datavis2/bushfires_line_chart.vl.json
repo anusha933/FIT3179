@@ -1,0 +1,50 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Unplanned burns by state from 2016–2021",
+  "width": 900,
+  "height": 500,
+  "data": {
+    "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/unplanned_burns.csv",
+    "format": {"type": "csv"}
+  },
+  "transform": [
+    {"filter": "datum.State != 'Grand Total'"},
+    {
+      "fold": [
+        "2016-2017",
+        "2017-2018",
+        "2018-2019",
+        "2019-2020",
+        "2020-2021"
+      ],
+      "as": ["Year", "Burns"]
+    }
+  ],
+  "mark": {"type": "line", "point": true},
+  "encoding": {
+    "x": {
+      "field": "Year",
+      "type": "nominal",
+      "title": "Year"
+    },
+    "y": {
+      "field": "Burns",
+      "type": "quantitative",
+      "title": "Burns (count)"
+    },
+    "color": {
+      "field": "State",
+      "type": "nominal",
+      "title": "State"
+    },
+    "tooltip": [
+      {"field": "State"},
+      {"field": "Year"},
+      {"field": "Burns"}
+    ]
+  },
+  "config": {
+    "axis": {"labelFontSize": 12, "titleFontSize": 13},
+    "legend": {"titleFontSize": 13, "labelFontSize": 12}
+  }
+}
