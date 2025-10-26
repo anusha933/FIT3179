@@ -1,77 +1,67 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "autosize": {"resize": true},
+  "title": "Unplanned Burns in Australia (2019–2020)",
+  "width": 900,
+  "height": 600,
+  "projection": {"type": "mercator", "center": [133, -28], "scale": 850},
 
-  "vconcat": [
+  "data": {
+    "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/unplanned_burns_fixed.csv",
+    "format": {"type": "csv"}
+  },
+
+  "transform": [
+    {"filter": "datum.State !== 'Grand Total'"},
+    {"fold": ["2016-2017", "2017-2018", "2018-2019", "2019-2020", "2020-2021"], "as": ["Year", "Burns"]},
+    {"filter": "datum.Year === '2019-2020'"},
+    {"calculate": "toNumber(datum.Burns)", "as": "BurnsNum"}
+  ],
+
+  "layer": [
     {
-      "title": "Australian States / Territories",
-      "width": 800,
-      "height": 400,
-      "projection": {
-        "type": "mercator",
-        "center": [133, -28],
-        "scale": 850
-      },
       "data": {
         "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/au-states-topo.json",
-        "format": {
-          "type": "topojson",
-          "feature": "austates"
-        }
-      },
-      "mark": {
-        "type": "geoshape",
-        "fill": "#f5f5f5",
-        "stroke": "white",
-        "strokeWidth": 1
-      }
-    },
-
-    {
-      "title": "Unplanned Burns by State (2019–2020)",
-      "width": 700,
-      "data": {
-        "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/unplanned_burns.csv",
-        "format": {"type": "csv"}
+        "format": {"type": "topojson", "feature": "austates"}
       },
       "transform": [
-        { "filter": "datum.Year === '2019-2020'" },
         {
-          "calculate": "toNumber(datum.Burns)",
-          "as": "BurnsNum"
+          "calculate": "datum.id === 0 ? 'NSW' : datum.id === 1 ? 'VIC' : datum.id === 2 ? 'QLD' : datum.id === 3 ? 'SA' : datum.id === 4 ? 'WA' : datum.id === 5 ? 'TAS' : datum.id === 6 ? 'NT' : 'ACT'",
+          "as": "State"
         },
         {
-          "calculate": "datum.StateCode === 'ACT' ? 'Australian Capital Territory' : datum.StateCode === 'NSW' ? 'New South Wales' : datum.StateCode === 'NT' ? 'Northern Territory' : datum.StateCode === 'QLD' ? 'Queensland' : datum.StateCode === 'SA' ? 'South Australia' : datum.StateCode === 'TAS' ? 'Tasmania' : datum.StateCode === 'VIC' ? 'Victoria' : datum.StateCode === 'WA' ? 'Western Australia' : datum.StateCode",
-          "as": "StateNameFull"
-        }
+          "lookup": "State",
+          "from": {
+            "data": {
+              "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/unplanned_burns.csv",
+              "format": {"type": "csv"}
+            },
+            "key": "State",
+            "fields": ["2019-2020"]
+          },
+          "as": ["Burns"]
+        },
+        {"calculate": "toNumber(datum.Burns)", "as": "BurnsNum"}
       ],
-      "mark": {"type": "bar"},
+      "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 1},
       "encoding": {
-        "x": {
-          "field": "BurnsNum",
-          "type": "quantitative",
-          "title": "Unplanned Burns"
-        },
-        "y": {
-          "field": "StateNameFull",
-          "type": "nominal",
-          "sort": "-x",
-          "title": null
-        },
         "color": {
           "field": "BurnsNum",
           "type": "quantitative",
-          "scale": {"scheme": "orangered"},
-          "legend": null
+          "title": "Unplanned Burns (2019–2020)",
+          "scale": {"scheme": "orangered"}
         },
         "tooltip": [
-          {"field": "StateNameFull", "type": "nominal", "title": "State"},
-          {"field": "BurnsNum", "type": "quantitative", "title": "Unplanned Burns"},
-          {"field": "Year", "type": "nominal", "title": "Year"}
+          {"field": "State", "type": "nominal"},
+          {"field": "BurnsNum", "type": "quantitative", "title": "Unplanned Burns"}
         ]
       }
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/au-states-topo.json",
+        "format": {"type": "topojson", "feature": "austates"}
+      },
+      "mark": {"type": "geoshape", "fill": null, "stroke": "white", "strokeWidth": 1.2}
     }
-  ],
-
-  "config": {}
+  ]
 }
