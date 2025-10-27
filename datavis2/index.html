@@ -4,12 +4,13 @@
   <meta charset="utf-8" />
   <title>Australian Bushfire Activity, Impact & Future Climate</title>
 
-  <!-- Vega libraries -->
+  <!-- load Vega core, Vega-Lite (chart spec language), and vega-embed (helper to insert charts) -->
   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 
   <style>
+    /* page layout + typography */
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: #fafafa;
@@ -19,15 +20,18 @@
       line-height: 1.5;
     }
 
+    /* center content column */
     main {
       max-width: 900px;
       margin: 0 auto;
     }
 
+    /* hero header block */
     header {
       margin-bottom: 2rem;
     }
 
+    /* main page title */
     h1 {
       margin: 0 0 0.75rem 0;
       font-size: 2rem;
@@ -36,6 +40,7 @@
       line-height: 1.2;
     }
 
+    /* intro paragraph under title */
     p.lead {
       margin: 0;
       font-size: 1rem;
@@ -43,6 +48,7 @@
       max-width: 800px;
     }
 
+    /* each storytelling section (heading + text + chart) */
     section {
       margin: 2rem 0 3rem 0;
       padding: 1.5rem 1.5rem 1rem 1.5rem;
@@ -52,6 +58,7 @@
       border: 1px solid rgba(0,0,0,0.05);
     }
 
+    /* section subheading */
     section h2 {
       margin-top: 0;
       margin-bottom: 0.5rem;
@@ -61,6 +68,7 @@
       line-height: 1.3;
     }
 
+    /* description text before/after charts */
     section p.desc {
       margin-top: 0;
       margin-bottom: 1rem;
@@ -68,17 +76,19 @@
       color: #555;
     }
 
-    /* where each vis goes */
+    /* generic chart container */
     .viz {
       width: 100%;
       min-height: 360px;
       margin-bottom: 1rem;
     }
 
+    /* taller container for the map */
     .viz.map {
-      min-height: 480px;
+      min-height: 480px; /* adds extra height to map */
     }
 
+    /* footer credits at bottom */
     footer {
       margin-top: 3rem;
       font-size: 0.7rem;
@@ -90,49 +100,51 @@
 <body>
 <main>
 
-  <!-- PAGE TITLE + OPENING CONTEXT -->
+  <!-- top heading + overview text -->
   <header>
     <h1>Unplanned Burns, Bushfire Impact, and Future Heat in Australia</h1>
     <p class="lead">
       Australia experiences frequent landscape fires, but not all fire seasons are equal.
-      Below, we look at how unplanned burns were distributed across states in 2019–2020,
+      Below, we look at how unplanned burns were distributed across states in 2019-2020,
       how major historical bushfire disasters compare in terms of homes and lives lost,
       and how projected warming across Australian locations could shape future fire risk.
     </p>
   </header>
 
-  <!-- SECTION 1: CHOROPLETH MAP FIRST -->
+  <!-- section 1: choropleth map -->
   <section id="sec-map">
-    <h2>Where unplanned burns were concentrated in 2019–2020</h2>
+    <h2>Where unplanned burns were concentrated in 2019-2020</h2>
     <p class="desc">
-      This map shows the intensity of unplanned burns by state during the 2019–2020 fire
+      This map shows the intensity of unplanned burns by state during the 2019-2020 fire
       season (the “Black Summer” period). Darker colour = more recorded unplanned burns.
-      You can see that fire activity was not evenly spread — some states carried a much
+      You can see that fire activity was not evenly spread - some states carried a much
       heavier load than others during that season.
     </p>
 
+    <!-- chart goes here -->
     <div id="chart-map" class="viz map"></div>
 
     <p class="desc">
-      2019–2020 is widely remembered for catastrophic bushfire conditions, but this view
+      2019-2020 is widely remembered for catastrophic bushfire conditions, but this view
       reminds us it’s also a state-by-state story. Management capacity, vegetation type,
       drought intensity, and heat all interact differently across the country.
     </p>
   </section>
 
-  <!-- SECTION 2: TREND OVER TIME -->
+  <!-- section 2: line chart over time -->
   <section id="sec-trend">
-    <h2>How unplanned burns change over time (2016–2021)</h2>
+    <h2>How unplanned burns change over time (2016-2021)</h2>
     <p class="desc">
       Each line below is a state. We track the number of reported unplanned burns per
-      fire year from 2016–17 through 2020–21. Peaks can signal especially active seasons,
+      fire year from 2016-17 through 2020-21. Peaks can signal especially active seasons,
       pressure on emergency services, and harsher underlying climate conditions.
     </p>
 
+    <!-- chart goes here -->
     <div id="chart-trend" class="viz"></div>
   </section>
 
-  <!-- SECTION 3: EVENT SEVERITY -->
+  <!-- section 3: bubble plot comparing major fire events -->
   <section id="sec-events">
     <h2>Major Australian bushfires: scale vs damage</h2>
     <p class="desc">
@@ -140,27 +152,30 @@
       (in thousand hectares, log scale), the y-axis is homes lost, and the bubble
       size represents lives lost. This helps compare historical disasters like
       Ash Wednesday (1983) and Black Saturday (2009) to the more recent Black Summer
-      (2019–20).
+      (2019-20).
     </p>
 
+    <!-- chart goes here -->
     <div id="chart-events" class="viz"></div>
   </section>
 
-  <!-- SECTION 4: FUTURE HEAT -->
+  <!-- section 4: interactive future climate chart -->
   <section id="sec-future">
     <h2>Future projected temperatures (RCP2.6 scenario)</h2>
     <p class="desc">
       This chart shows projected average monthly temperatures for several Australian
       locations under different future climate periods. Use the dropdown in the chart
-      to switch between 2020–2039, 2040–2059, 2060–2079, and 2080–2099. Warmer,
+      to switch between 2020-2039, 2040-2059, 2060-2079, and 2080-2099. Warmer,
       drier summers can extend fire seasons and increase fire danger windows.
     </p>
 
+    <!-- chart goes here -->
     <div id="chart-future" class="viz"></div>
   </section>
 
+  <!-- bottom credits -->
   <footer>
-    <strong>Data sources:</strong> State fire/forest agencies (unplanned burns 2016–2021),
+    <strong>Data sources:</strong> State fire/forest agencies (unplanned burns 2016-2021),
     compiled bushfire impact records for major incidents, and climate projection data for
     Australian monitoring stations (RCP2.6 scenario). All values may be aggregated or
     rounded.
@@ -168,12 +183,15 @@
 
 </main>
 
-<!-- SPECS + EMBED -->
+<!-- script part:
+     - define each Vega-Lite spec (specMap, specTrend, specEvents, specFuture)
+     - embed them into the matching divs -->
 <script>
-  // ====== SPEC: Choropleth Map (2019–2020) ======
+
+  // specMap: choropleth map of unplanned burns (2019-2020)
   const specMap = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-    "title": "Unplanned Burns in Australia (2019–2020)",
+    "title": "Unplanned Burns in Australia (2019-2020)",
     "width": 900,
     "height": 600,
     "projection": {"type": "mercator", "center": [133, -28], "scale": 850},
@@ -207,10 +225,12 @@
         },
         "transform": [
           {
+            // map topojson id to state code like VIC, NSW, etc
             "calculate": "datum.id === 0 ? 'NSW' : datum.id === 1 ? 'VIC' : datum.id === 2 ? 'QLD' : datum.id === 3 ? 'SA' : datum.id === 4 ? 'WA' : datum.id === 5 ? 'TAS' : datum.id === 6 ? 'NT' : 'ACT'",
             "as": "State"
           },
           {
+            // join burns data onto each state polygon
             "lookup": "State",
             "from": {
               "data": {
@@ -222,6 +242,7 @@
             },
             "as": ["Burns"]
           },
+          // convert to number so we can colour by it
           {"calculate": "toNumber(datum.Burns)", "as": "BurnsNum"}
         ],
         "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 1},
@@ -229,7 +250,7 @@
           "color": {
             "field": "BurnsNum",
             "type": "quantitative",
-            "title": "Unplanned Burns (2019–2020)",
+            "title": "Unplanned Burns (2019-2020)",
             "scale": {"scheme": "orangered"}
           },
           "tooltip": [
@@ -239,6 +260,7 @@
         }
       },
       {
+        // white outline layer above map
         "data": {
           "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/au-states-topo.json",
           "format": {"type": "topojson", "feature": "austates"}
@@ -248,10 +270,10 @@
     ]
   };
 
-  // ====== SPEC: Trend of Unplanned Burns Over Time ======
+  // specTrend: line chart of unplanned burns over years per state
   const specTrend = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-    "description": "Unplanned burns by state from 2016–2021",
+    "description": "Unplanned burns by state from 2016-2021",
     "width": 900,
     "height": 500,
     "data": {
@@ -300,7 +322,7 @@
     }
   };
 
-  // ====== SPEC: Major Events Bubble Plot ======
+  // specEvents: bubble plot comparing major fire events (area vs homes vs lives)
   const specEvents = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
     "title": "Major Australian Bushfire Events: Scale, Damage, and Lives Lost",
@@ -351,7 +373,7 @@
     }
   };
 
-  // ====== SPEC: Future Projected Temperatures ======
+  // specFuture: interactive grouped bar chart of projected temperatures
   const specFuture = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
     "title": {
@@ -368,6 +390,7 @@
       "format": {"type": "csv"}
     },
 
+    // dropdown menu for time period selection
     "params": [
       {
         "name": "yearSelect",
@@ -386,6 +409,7 @@
         "filter": "indexof(['ALICE-SPRINGS-AIRPORT','CANBERRA-AIRPORT','DARWIN-AIRPORT','SYDNEY-OBSERVATORY-HILL'], datum.STATION_NAME) >= 0"
       },
       {
+        // fold: turn monthly columns into rows {Month, TempC}
         "fold": [
           "January","February","March","April","May","June",
           "July","August","September","October","November","December"
@@ -393,6 +417,7 @@
         "as": ["Month","TempC"]
       },
       {
+        // MonthOrder: keep months in calendar order
         "calculate": "indexof(['January','February','March','April','May','June','July','August','September','October','November','December'], datum.Month)",
         "as": "MonthOrder"
       }
@@ -407,6 +432,7 @@
         "sort": {"field": "MonthOrder", "order": "ascending"},
         "title": "Month"
       },
+      // xOffset: group bars by station within each month
       "xOffset": {
         "field": "STATION_NAME",
         "type": "nominal",
@@ -437,7 +463,7 @@
     }
   };
 
-  // === Embed charts into each section ===
+  // embed specs into each div on the page
   vegaEmbed('#chart-map',    specMap,    {actions: false});
   vegaEmbed('#chart-trend',  specTrend,  {actions: false});
   vegaEmbed('#chart-events', specEvents, {actions: false});
