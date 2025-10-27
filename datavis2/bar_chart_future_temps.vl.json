@@ -1,0 +1,84 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Projected Monthly Mean Temperature (RCP2.6)",
+    "subtitle": "Comparison of selected Australian cities across future climate periods",
+    "fontSize": 18,
+    "anchor": "start"
+  },
+  "width": 800,
+  "height": 400,
+
+  "data": {
+    "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/future_temps.csv",
+    "format": {"type": "csv"}
+  },
+
+  "params": [
+    {
+      "name": "yearSelect",
+      "value": "2020-2039",
+      "bind": {
+        "input": "select",
+        "options": ["2020-2039", "2040-2059", "2060-2079", "2080-2099"],
+        "name": "Select Time Period: "
+      }
+    }
+  ],
+
+  "transform": [
+    {"filter": "datum.CLIMATOLOGY == yearSelect"},
+    {
+      "filter": "indexof(['ALICE-SPRINGS-AIRPORT','CANBERRA-AIRPORT','DARWIN-AIRPORT','SYDNEY-OBSERVATORY-HILL'], datum.STATION_NAME) >= 0"
+    },
+    {
+      "fold": [
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
+      ],
+      "as": ["Month","TempC"]
+    },
+    {
+      "calculate": "indexof(['January','February','March','April','May','June','July','August','September','October','November','December'], datum.Month)",
+      "as": "MonthOrder"
+    }
+  ],
+
+  "mark": "bar",
+
+  "encoding": {
+    "x": {
+      "field": "Month",
+      "type": "ordinal",
+      "sort": {"field": "MonthOrder", "order": "ascending"},
+      "title": "Month"
+    },
+    "xOffset": {
+      "field": "STATION_NAME",
+      "type": "nominal",
+      "title": null
+    },
+    "y": {
+      "aggregate": "mean",
+      "field": "TempC",
+      "type": "quantitative",
+      "title": "Mean Monthly Temperature (°C)"
+    },
+    "color": {
+      "field": "STATION_NAME",
+      "type": "nominal",
+      "title": "Location"
+    },
+    "tooltip": [
+      {"field": "STATION_NAME", "title": "Location"},
+      {"field": "Month"},
+      {"field": "TempC", "aggregate": "mean", "title": "Temperature (°C)", "format": ".1f"},
+      {"field": "CLIMATOLOGY", "title": "Time Period"}
+    ]
+  },
+
+  "config": {
+    "axis": {"labelFontSize": 12, "titleFontSize": 13},
+    "legend": {"titleFontSize": 13, "labelFontSize": 12}
+  }
+}

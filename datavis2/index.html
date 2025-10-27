@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Australian Fire Risk, Impact, and Climate Context</title>
+
+  <!-- Vega libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #fafafa;
+      color: #222;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    header {
+      max-width: 1300px;
+      margin: 0 auto 2rem auto;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: #111;
+    }
+
+    p.subtitle {
+      margin: 0;
+      max-width: 900px;
+      line-height: 1.4;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* responsive grid for the dashboard cards */
+    .dashboard {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+      padding: 1rem 1rem 0.5rem 1rem;
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .card p.desc {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #666;
+      margin: 0 0 0.75rem 0;
+    }
+
+    /* each actual vis mounts here */
+    .viz {
+      width: 100%;
+      min-height: 320px;
+    }
+
+    /* make the map card taller automatically */
+    .viz.map {
+      min-height: 420px;
+    }
+
+    footer {
+      max-width: 1300px;
+      margin: 2rem auto 0 auto;
+      font-size: 0.7rem;
+      color: #777;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Australian Bushfire Activity, Impact & Future Climate</h1>
+    <p class="subtitle">
+      This dashboard explores (1) how unplanned burns vary across states,
+      (2) how catastrophic events have cost homes and lives,
+      (3) how fires concentrated across Australia in 2019–2020,
+      and (4) how projected future temperatures shift across Australian locations.
+    </p>
+  </header>
+
+  <section class="dashboard">
+
+    <!-- CARD 1: Future temperature projections -->
+    <div class="card">
+      <h2>Projected Monthly Mean Temperature (RCP2.6)</h2>
+      <p class="desc">
+        Choose a future climate period and compare seasonal warming patterns across locations.
+      </p>
+      <div id="chart1" class="viz"></div>
+    </div>
+
+    <!-- CARD 2: Major bushfire events bubble plot -->
+    <div class="card">
+      <h2>Major Australian Bushfire Events</h2>
+      <p class="desc">
+        Area burnt vs homes lost, bubble size = lives lost. Log-scaled x-axis shows how extreme Black Summer was.
+      </p>
+      <div id="chart2" class="viz"></div>
+    </div>
+
+    <!-- CARD 3: Unplanned burns over time by state -->
+    <div class="card">
+      <h2>Unplanned Burns by State (2016–2021)</h2>
+      <p class="desc">
+        Each line tracks a state's unplanned burn count per fire season.
+      </p>
+      <div id="chart3" class="viz"></div>
+    </div>
+
+    <!-- CARD 4: Choropleth map -->
+    <div class="card">
+      <h2>Unplanned Burns in Australia (2019–2020)</h2>
+      <p class="desc">
+        State-level intensity of unplanned burns during the 2019–2020 fire season.
+      </p>
+      <div id="chart4" class="viz map"></div>
+    </div>
+
+  </section>
+
+  <footer>
+    <strong>Sources:</strong> future climate projections dataset; Australian bushfire incident records; state fire & forest services data 2016–2021.
+  </footer>
+
+  <!-- SPECS + EMBED -->
+  <script>
+    // ===== SPEC 1: Projected Monthly Mean Temperature (RCP2.6) =====
+    const spec1 = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "title": {
+        "text": "Projected Monthly Mean Temperature (RCP2.6)",
+        "subtitle": "Comparison of selected Australian cities across future climate periods",
+        "fontSize": 18,
+        "anchor": "start"
+      },
+      "width": 800,
+      "height": 400,
+
+      "data": {
+        "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/future_temps.csv",
+        "format": {"type": "csv"}
+      },
+
+      "params": [
+        {
+          "name": "yearSelect",
+          "value": "2020-2039",
+          "bind": {
+            "input": "select",
+            "options": ["2020-2039", "2040-2059", "2060-2079", "2080-2099"],
+            "name": "Select Time Period: "
+          }
+        }
+      ],
+
+      "transform": [
+        {"filter": "datum.CLIMATOLOGY == yearSelect"},
+        {
+          "filter": "indexof(['ALICE-SPRINGS-AIRPORT','CANBERRA-AIRPORT','DARWIN-AIRPORT','SYDNEY-OBSERVATORY-HILL'], datum.STATION_NAME) >= 0"
+        },
+        {
+          "fold": [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+          ],
+          "as": ["Month","TempC"]
+        },
+        {
+          "calculate": "indexof(['January','February','March','April','May','June','July','August','September','October','November','December'], datum.Month)",
+          "as": "MonthOrder"
+        }
+      ],
+
+      "mark": "bar",
+
+      "encoding": {
+        "x": {
+          "field": "Month",
+          "type": "ordinal",
+          "sort": {"field": "MonthOrder", "order": "ascending"},
+          "title": "Month"
+        },
+        "xOffset": {
+          "field": "STATION_NAME",
+          "type": "nominal",
+          "title": null
+        },
+        "y": {
+          "aggregate": "mean",
+          "field": "TempC",
+          "type": "quantitative",
+          "title": "Mean Monthly Temperature (°C)"
+        },
+        "color": {
+          "field": "STATION_NAME",
+          "type": "nominal",
+          "title": "Location"
+        },
+        "tooltip": [
+          {"field": "STATION_NAME", "title": "Location"},
+          {"field": "Month"},
+          {"field": "TempC", "aggregate": "mean", "title": "Temperature (°C)", "format": ".1f"},
+          {"field": "CLIMATOLOGY", "title": "Time Period"}
+        ]
+      },
+
+      "config": {
+        "axis": {"labelFontSize": 12, "titleFontSize": 13},
+        "legend": {"titleFontSize": 13, "labelFontSize": 12}
+      }
+    };
+
+    // ===== SPEC 2: Major Australian Bushfire Events =====
+    const spec2 = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "title": "Major Australian Bushfire Events: Scale, Damage, and Lives Lost",
+      "data": {
+        "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/fire_incidents.csv",
+        "format": {"type": "csv"}
+      },
+      "width": 700,
+      "height": 400,
+
+      "transform": [
+        {"calculate": "toNumber(datum['Area Burnt (ha, thousand)'])", "as": "AreaBurntNum"},
+        {"calculate": "toNumber(datum['Homes lost'])", "as": "HomesLostNum"},
+        {"calculate": "toNumber(datum['Lives lost'])", "as": "LivesLostNum"}
+      ],
+
+      "mark": {"type": "circle", "opacity": 0.8, "stroke": "black", "strokeWidth": 1},
+
+      "encoding": {
+        "x": {
+          "field": "AreaBurntNum",
+          "type": "quantitative",
+          "title": "Area Burnt (thousand hectares, log scale)",
+          "scale": {"type": "log"}
+        },
+        "y": {
+          "field": "HomesLostNum",
+          "type": "quantitative",
+          "title": "Homes Lost"
+        },
+        "size": {
+          "field": "LivesLostNum",
+          "type": "quantitative",
+          "title": "Lives Lost",
+          "scale": {"range": [100, 3000]}
+        },
+        "color": {
+          "field": "Incident",
+          "type": "nominal",
+          "title": "Incident"
+        },
+        "tooltip": [
+          {"field": "Incident", "type": "nominal"},
+          {"field": "AreaBurntNum", "type": "quantitative", "title": "Area Burnt (thousand ha)"},
+          {"field": "HomesLostNum", "type": "quantitative", "title": "Homes Lost"},
+          {"field": "LivesLostNum", "type": "quantitative", "title": "Lives Lost"}
+        ]
+      }
+    };
+
+    // ===== SPEC 3: Unplanned burns by state over time =====
+    const spec3 = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "Unplanned burns by state from 2016–2021",
+      "width": 900,
+      "height": 500,
+      "data": {
+        "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/unplanned_burns.csv",
+        "format": {"type": "csv"}
+      },
+      "transform": [
+        {"filter": "datum.State != 'Grand Total'"},
+        {
+          "fold": [
+            "2016-2017",
+            "2017-2018",
+            "2018-2019",
+            "2019-2020",
+            "2020-2021"
+          ],
+          "as": ["Year", "Burns"]
+        }
+      ],
+      "mark": {"type": "line", "point": true},
+      "encoding": {
+        "x": {
+          "field": "Year",
+          "type": "nominal",
+          "title": "Year"
+        },
+        "y": {
+          "field": "Burns",
+          "type": "quantitative",
+          "title": "Burns (count)"
+        },
+        "color": {
+          "field": "State",
+          "type": "nominal",
+          "title": "State"
+        },
+        "tooltip": [
+          {"field": "State"},
+          {"field": "Year"},
+          {"field": "Burns"}
+        ]
+      },
+      "config": {
+        "axis": {"labelFontSize": 12, "titleFontSize": 13},
+        "legend": {"titleFontSize": 13, "labelFontSize": 12}
+      }
+    };
+
+    // ===== SPEC 4: Choropleth map for 2019-2020 =====
+    const spec4 = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "title": "Unplanned Burns in Australia (2019–2020)",
+      "width": 900,
+      "height": 600,
+      "projection": {"type": "mercator", "center": [133, -28], "scale": 850},
+
+      "data": {
+        "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/unplanned_burns.csv",
+        "format": {"type": "csv"}
+      },
+
+      "transform": [
+        {"filter": "datum.State !== 'Grand Total'"},
+        {
+          "fold": [
+            "2016-2017",
+            "2017-2018",
+            "2018-2019",
+            "2019-2020",
+            "2020-2021"
+          ],
+          "as": ["Year", "Burns"]
+        },
+        {"filter": "datum.Year === '2019-2020'"},
+        {"calculate": "toNumber(datum.Burns)", "as": "BurnsNum"}
+      ],
+
+      "layer": [
+        {
+          "data": {
+            "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/au-states-topo.json",
+            "format": {"type": "topojson", "feature": "austates"}
+          },
+          "transform": [
+            {
+              "calculate": "datum.id === 0 ? 'NSW' : datum.id === 1 ? 'VIC' : datum.id === 2 ? 'QLD' : datum.id === 3 ? 'SA' : datum.id === 4 ? 'WA' : datum.id === 5 ? 'TAS' : datum.id === 6 ? 'NT' : 'ACT'",
+              "as": "State"
+            },
+            {
+              "lookup": "State",
+              "from": {
+                "data": {
+                  "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/data/unplanned_burns.csv",
+                  "format": {"type": "csv"}
+                },
+                "key": "State",
+                "fields": ["2019-2020"]
+              },
+              "as": ["Burns"]
+            },
+            {"calculate": "toNumber(datum.Burns)", "as": "BurnsNum"}
+          ],
+          "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 1},
+          "encoding": {
+            "color": {
+              "field": "BurnsNum",
+              "type": "quantitative",
+              "title": "Unplanned Burns (2019–2020)",
+              "scale": {"scheme": "orangered"}
+            },
+            "tooltip": [
+              {"field": "State", "type": "nominal"},
+              {
+                "field": "BurnsNum",
+                "type": "quantitative",
+                "title": "Unplanned Burns"
+              }
+            ]
+          }
+        },
+        {
+          "data": {
+            "url": "https://raw.githubusercontent.com/anusha933/FIT3179/main/datavis2/au-states-topo.json",
+            "format": {"type": "topojson", "feature": "austates"}
+          },
+          "mark": {"type": "geoshape", "fill": null, "stroke": "white", "strokeWidth": 1.2}
+        }
+      ]
+    };
+
+    // === actually render them in the divs ===
+    vegaEmbed('#chart1', spec1, {actions: false});
+    vegaEmbed('#chart2', spec2, {actions: false});
+    vegaEmbed('#chart3', spec3, {actions: false});
+    vegaEmbed('#chart4', spec4, {actions: false});
+  </script>
+
+</body>
+</html>
